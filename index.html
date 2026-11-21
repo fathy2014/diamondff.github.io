@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مفاجأة لك</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#07090b; --ink:#e8f0e8; --dim:#7b8a7b; --green:#37ff8b; --red:#ff2e3d; --paper:#f4f1e6; --paper-ink:#14110d;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;background:var(--bg);scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;height:100%;background:transparent;color:var(--ink);
+  font-family:"Segoe UI",Tahoma,"Noto Sans Arabic",system-ui,sans-serif;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.screen{display:none;width:100%;max-width:520px;padding:24px;text-align:center}
+.screen.on{display:block}
+
+/* intro */
+#intro h1{font-size:2rem;margin:0 0 .5rem}
+#intro p{color:var(--dim);margin:0 0 2rem}
+button{
+  font:inherit;font-weight:700;font-size:1.15rem;border:0;border-radius:14px;
+  padding:16px 34px;background:var(--green);color:#04150a;cursor:pointer;
+}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+
+/* hack */
+#hack{text-align:start}
+html.alarm{animation:flash 1s steps(2,end) infinite}
+@keyframes flash{0%{background:#1a0003}50%{background:var(--bg)}}
+.title{
+  font-size:clamp(2.4rem,13vw,4.4rem);font-weight:900;color:var(--red);text-align:center;
+  margin:0 0 1rem;line-height:1.1;position:relative;
+  text-shadow:2px 0 #00e5ff,-2px 0 #ff00c8;animation:glitch .6s steps(2,end) infinite;
+}
+@keyframes glitch{
+  0%{transform:translate(0)}25%{transform:translate(-3px,2px)}
+  50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,-1px)}100%{transform:translate(0)}
+}
+.sub{text-align:center;color:var(--ink);margin:0 0 1rem;font-size:1.05rem}
+#term{
+  direction:ltr;text-align:left;font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:.86rem;line-height:1.55;color:var(--green);height:11.5em;overflow:hidden;
+  border:1px solid #1d3a28;border-radius:10px;padding:12px;background:#030504;
+}
+.bar{height:12px;border-radius:6px;background:#1b1f1c;margin-top:16px;overflow:hidden;direction:ltr}
+.bar i{display:block;height:100%;width:0;background:var(--red)}
+#pct{direction:ltr;text-align:center;margin-top:8px;color:var(--dim);font-variant-numeric:tabular-nums}
+
+/* doxx */
+#doxx{text-align:start}
+#doxx h2{color:var(--red);text-align:center;font-size:2rem;margin:0 0 1rem}
+.row{display:flex;gap:10px;align-items:baseline;padding:10px 12px;margin-bottom:8px;border:1px solid #3a1217;border-radius:10px;background:#120508;animation:pop .25s ease-out}
+.row b{color:var(--dim);font-weight:600;min-width:6.5em}
+.row span{color:var(--ink);font-weight:700}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* reveal */
+#reveal{color:var(--paper-ink)}
+#reveal .emoji{font-size:5rem;line-height:1}
+#reveal h2{font-size:2.6rem;margin:.4rem 0}
+#reveal p{font-size:1.15rem;margin:0 0 1.8rem}
+#reveal button{background:var(--paper-ink);color:var(--paper)}
+html.joke{background:var(--paper);animation:none}
+
+@media (prefers-reduced-motion:reduce){
+  html.alarm,.title{animation:none}
+}
+</style>
+</head>
+<body>
+
+<section class="screen on" id="intro">
+  <h1>🎁 مفاجأة لك</h1>
+  <p>اضغط الزر وشوف وش فيه</p>
+  <button id="go">افتح المفاجأة</button>
+</section>
+
+<section class="screen" id="hack" aria-live="polite">
+  <h1 class="title">تم تهكيرك!</h1>
+  <p class="sub">تم تهكير حسابك وجهازك</p>
+  <div id="term"></div>
+  <div class="bar"><i id="fill"></i></div>
+  <div id="pct">0%</div>
+</section>
+
+<section class="screen" id="doxx" aria-live="polite">
+  <h2>نعرف عنك كل شي 👁</h2>
+  <div id="rows"></div>
+</section>
+
+<section class="screen" id="reveal">
+  <div class="emoji">😂</div>
+  <h2>مزحة!</h2>
+  <p>هذا مقلب، أنا فاتحها عليك! ما صار شي وكل شي عندك سليم 😄</p>
+  <button id="again">شغّلها مرة ثانية</button>
+</section>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var intro=$("intro"),hack=$("hack"),doxx=$("doxx"),rows=$("rows"),reveal=$("reveal"),term=$("term"),fill=$("fill"),pct=$("pct");
+  // عدّل التفاصيل هنا
+  var INFO=[
+    ["الاسم","تركي محمد هزاع الحيدري"],
+    ["المدينة","الرياض، السعودية"],
+    ["الحي","حي بدر"],
+    ["قرب","المسجد اللي في الحي"],
+    ["بيتك","عند بوابة كبيرة"],
+    ["القمر الصناعي","أشوف بيتك الحين 🛰"],
+    ["موقعك الحين","عند مستشفى"],
+    ["سيارتكم","سودة"]
+  ];
+  var lines=[
+    "> connecting to target device...",
+    "> bypassing firewall ........ OK",
+    "> cracking password ......... OK",
+    "> accessing gallery ......... OK",
+    "> reading messages .......... OK",
+    "> copying contacts .......... OK",
+    "> uploading data to server 13.37.0.1",
+    "> deleting evidence ......... OK",
+    "> all done. enjoy :)"
+  ];
+  var timers=[];
+  function show(el){
+    [intro,hack,doxx,reveal].forEach(function(s){s.classList.remove("on")});
+    el.classList.add("on");
+  }
+  function clearAll(){timers.forEach(clearTimeout);timers=[]}
+  function buzz(p){try{if(navigator.vibrate)navigator.vibrate(p)}catch(e){}}
+
+  function start(){
+    clearAll();
+    term.textContent="";
+    fill.style.width="0";pct.textContent="0%";
+    document.documentElement.classList.remove("joke");
+    document.documentElement.classList.add("alarm");
+    show(hack);
+    buzz([200,100,200,100,400]);
+
+    var total=9000,step=100,t=0;
+    function tick(){
+      t+=step;
+      var p=Math.min(100,Math.round(t/total*100));
+      fill.style.width=p+"%";pct.textContent=p+"%";
+      if(p<100){timers.push(setTimeout(tick,step))}
+      else{timers.push(setTimeout(finish,700))}
+    }
+    timers.push(setTimeout(tick,step));
+
+    lines.forEach(function(l,i){
+      timers.push(setTimeout(function(){
+        term.textContent+=l+"\n";
+        term.scrollTop=term.scrollHeight;
+      },600+i*950));
+    });
+  }
+
+  function finish(){
+    document.documentElement.classList.remove("alarm");
+    rows.textContent="";
+    show(doxx);
+    buzz(150);
+    INFO.forEach(function(r,i){
+      timers.push(setTimeout(function(){
+        var d=document.createElement("div");
+        d.className="row";
+        var k=document.createElement("b");k.textContent=r[0];
+        var v=document.createElement("span");v.textContent=r[1];
+        d.appendChild(k);d.appendChild(v);rows.appendChild(d);
+        buzz(60);
+      },500+i*1300));
+    });
+    timers.push(setTimeout(joke,500+INFO.length*1300+2200));
+  }
+
+  function joke(){
+    document.documentElement.classList.add("joke");
+    show(reveal);
+    buzz(80);
+  }
+
+  $("go").addEventListener("click",start);
+  $("again").addEventListener("click",start);
+})();
+</script>
+</body>
+</html>
